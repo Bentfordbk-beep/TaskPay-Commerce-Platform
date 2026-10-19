@@ -1,0 +1,894 @@
+TASKPAY — COMPLETE APPLICATION BUILD SPECIFICATION
+
+Build a complete, modern, mobile-first, full-stack web application called TaskPay, with the tagline “Sell. Learn. Earn.”
+
+IMPORTANT: Read the entire specification before building. Build the application as one coherent project. Do not stop after creating a landing page, static mockup or frontend prototype. Do not ask me follow-up questions. Make sensible implementation decisions, preserve working code, and prioritise a functional, secure, well-structured MVP.
+
+1. BUSINESS OVERVIEW
+
+TaskPay is a digital commerce and opportunity platform designed to connect businesses, customers, affiliates, digital creators, event organisers and people seeking legitimate digital work opportunities.
+
+TaskPay combines five core service areas:
+
+1. Online marketplace for physical and digital products.
+2. Affiliate marketing, allowing users to promote products and earn commissions on qualifying, verified sales.
+3. Paid promotional campaigns connecting businesses with digital promoters.
+4. Digital learning, allowing creators to sell courses and users to purchase and access them.
+5. Event ticketing, allowing organisers to list events and sell tickets.
+
+The platform must be designed to support expansion beyond Ghana in the future.
+
+The business must generate revenue through vendor memberships, disclosed sales commissions, promotional campaign fees, featured product placements, digital learning commissions and event ticketing fees.
+
+Customers must be able to browse the marketplace without paying an access fee. Never make recruitment of new members the basis of earning commissions.
+
+2. TECHNOLOGY AND DEVELOPMENT REQUIREMENTS
+
+Build a real full-stack application with:
+
+* A responsive, mobile-first frontend.
+* A working backend and database.
+* Secure authentication and role-based access control.
+* Persistent database storage rather than temporary frontend-only state.
+* Validated forms and clear error messages.
+* Server-side validation for all financial and privileged operations.
+* Reusable components and a consistent design system.
+* Environment variables for API keys, secrets and configuration.
+* Clear setup instructions and a README.
+
+Use the framework, database and infrastructure best supported by the Replit environment. Prefer a simple, maintainable architecture that can be completed within the available resources. Do not introduce unnecessary services, dependencies or complex infrastructure.
+
+Do not rebuild the same feature multiple times. Inspect the existing project structure before modifying or replacing files. If this is a new project, initialise it cleanly.
+
+Do not leave important buttons nonfunctional, create fake payment confirmations, or use hardcoded balances as if they were real money.
+
+3. BRAND AND VISUAL DESIGN
+
+Create a polished, professional fintech and e-commerce brand.
+
+Brand name: TaskPay.
+
+Tagline: Sell. Learn. Earn.
+
+Use:
+
+* Deep navy blue as the primary brand colour.
+* White and light neutral backgrounds.
+* Golden yellow for primary buttons, highlights and important actions.
+* Blue, purple, teal and coral as restrained accents for service categories.
+* Modern typography, clean spacing, rounded cards and subtle shadows.
+* Professional product photography and contemporary icons.
+* Clear navigation and accessible contrast.
+
+The design must look like a credible modern technology company, not a generic template or an old-fashioned earning website.
+
+Create a distinctive TaskPay logo using a simple, memorable symbol and wordmark. Keep the logo consistent across the landing page, login, registration, dashboards and application navigation.
+
+On desktop, use a well-structured layout with a professional header and content area. On mobile, use a compact header and bottom navigation where appropriate.
+
+The application must not look like a gambling website, pyramid scheme or get-rich-quick platform. Do not use casino-style graphics, fake earnings notifications or exaggerated income promises.
+
+4. PUBLIC WEBSITE AND LANDING PAGE
+
+Create a complete public-facing homepage with:
+
+Header
+
+* TaskPay logo.
+* Home.
+* Shop.
+* Affiliate Marketing.
+* Promotional Campaigns.
+* Digital Learning.
+* Events.
+* Become a Vendor.
+* Log In.
+* Sign Up.
+
+On mobile, use a responsive menu.
+
+Hero section
+
+Headline: “Your Business. Your Opportunities. One Platform.”
+
+Supporting text: “Discover products, grow your business, promote brands, develop digital skills and explore opportunities in digital commerce.”
+
+Primary CTA: “Get Started”.
+
+Secondary CTA: “Explore Products”.
+
+Use attractive, modern visuals showing commerce, technology and diverse African entrepreneurs.
+
+Homepage sections
+
+1. Featured physical products.
+2. Featured digital products.
+3. Product categories.
+4. How TaskPay works.
+5. Become a vendor.
+6. Affiliate marketing and commissions.
+7. Promotional campaigns.
+8. Digital courses and learning.
+9. Upcoming events and tickets.
+10. Why businesses choose TaskPay.
+11. Frequently asked questions.
+12. Professional footer with contact information, Terms, Privacy Policy and relevant business links.
+
+Show real database content when available. For an empty database, display a helpful empty state instead of fake sales, reviews or user counts.
+
+5. AUTHENTICATION AND USER ROLES
+
+Implement secure registration, login, logout, password hashing and appropriate session management.
+
+Support these roles:
+
+* Customer.
+* Affiliate.
+* Vendor.
+* Course Creator.
+* Event Organiser.
+* Administrator.
+
+A user may have more than one permitted role. Use permissions and role assignments rather than creating duplicate accounts for each role.
+
+Registration fields:
+
+* Full name.
+* Email address.
+* Phone number, including Ghanaian numbers.
+* Password.
+* Password confirmation.
+* Acceptance of Terms and Privacy Policy.
+
+Provide login using email or phone number where supported by the authentication implementation.
+
+Provide password recovery and appropriate verification flows. If email or SMS delivery is not configured, show a clear setup requirement instead of pretending verification has occurred.
+
+New public registrations must never receive administrator privileges.
+
+Create a secure initial administrator bootstrap process using environment variables such as ADMIN_EMAIL and ADMIN_PASSWORD, or an equivalent secure setup mechanism. Hash the password and require an appropriate password change or secure reset on first use.
+
+Never hardcode a public administrator password into frontend code, source files or the README.
+
+6. CUSTOMER DASHBOARD
+
+Create a customer dashboard with:
+
+* Welcome section.
+* Search bar.
+* Shop Products.
+* Digital Products.
+* Affiliate Marketing.
+* Promotional Campaigns.
+* Digital Learning.
+* Event Tickets.
+* Recent orders.
+* Purchased courses.
+* Purchased tickets.
+* Saved products.
+* Notifications.
+* Profile and account settings.
+* Help and support.
+
+Customers can browse and purchase products, courses and tickets without paying a platform access fee.
+
+7. PRODUCT MARKETPLACE AND CATEGORIES
+
+This section is critical.
+
+Physical products and digital products must be separate product types with separate category trees, filters and product details. Never mix digital products into physical product categories.
+
+Create two clearly separated marketplace sections.
+
+A. Physical Products
+
+Categories:
+
+* Fashion and Clothing.
+* Shoes and Footwear.
+* Bags and Accessories.
+* Phones and Electronics.
+* Computers and Accessories.
+* Home and Living.
+* Beauty and Personal Care.
+* Health and Wellness.
+* Food and Beverages.
+* Books and Stationery.
+* Sports and Fitness.
+* Baby and Kids.
+* Other Physical Products.
+
+Physical product fields:
+
+* Product name.
+* Description.
+* Category and subcategory.
+* Product images.
+* Price.
+* Optional sale price.
+* Available stock quantity.
+* Product variants such as size, colour or model where relevant.
+* Vendor.
+* Shipping or delivery options.
+* Product condition where relevant.
+* Publication status.
+* Affiliate eligibility.
+* Commission settings.
+* Creation and update timestamps.
+
+Support product search, sorting, category filtering, price filtering and pagination.
+
+Physical product checkout must account for stock, delivery information, order status and payment status.
+
+B. Digital Products
+
+Create a separate Digital Products section with categories:
+
+* E-books and Guides.
+* Online Courses.
+* Templates and Digital Files.
+* Graphics and Design Assets.
+* Software and Digital Tools.
+* Business and Marketing Resources.
+* Audio and Video Content.
+* Other Digital Products.
+
+Digital product fields:
+
+* Product name.
+* Description.
+* Category and subcategory.
+* Cover image.
+* Price.
+* Creator or vendor.
+* Download file or protected access URL.
+* File type where applicable.
+* Publication status.
+* Affiliate eligibility.
+* Commission settings.
+* Creation and update timestamps.
+
+Digital products must not require physical shipping.
+
+Only purchasers with a verified, completed order may access protected downloads or purchased digital content. Do not expose private file URLs or unrestricted download paths publicly.
+
+Product detail pages
+
+Include:
+
+* Product images or cover image.
+* Product name.
+* Price.
+* Description.
+* Vendor or creator information.
+* Relevant category.
+* Availability.
+* Delivery information for physical products.
+* Digital access information for digital products.
+* Add to Cart or Buy Now.
+* Affiliate promotion option where enabled.
+* Related products of the same product type.
+
+Never display physical shipping fields on digital-only products.
+
+8. VENDOR STOREFRONTS AND VENDOR DASHBOARD
+
+Create a dedicated vendor registration and onboarding flow.
+
+Vendor onboarding should collect:
+
+* Business or store name.
+* Business description.
+* Contact details.
+* Location and country.
+* Business logo or store image.
+* Relevant business information.
+
+Support administrator review and vendor approval before allowing public product listings where required.
+
+Create a professional vendor dashboard with:
+
+* Overview.
+* Store profile.
+* Add Product.
+* Manage Physical Products.
+* Manage Digital Products.
+* Product categories.
+* Inventory.
+* Orders.
+* Sales reports.
+* Affiliate settings.
+* Promotional campaigns.
+* Featured listing options.
+* Vendor membership and renewal.
+* Transaction history.
+* Payout requests.
+* Notifications.
+* Support.
+
+Vendors must be able to create, edit, publish, unpublish and manage their own products.
+
+Vendors must not be able to edit another vendor’s products or view another vendor’s private financial information.
+
+Implement an annual vendor membership system with configurable pricing and activation dates. The administrator must control membership prices, duration, payment status and renewal rules.
+
+If membership is unpaid, apply the configured restrictions consistently. Do not delete a vendor’s products or order history because membership expires.
+
+9. AFFILIATE MARKETING
+
+Create a complete affiliate programme based on genuine product promotion and qualifying sales.
+
+Affiliate dashboard
+
+Include:
+
+* Affiliate overview.
+* Available products to promote.
+* My affiliate links.
+* Click tracking.
+* Verified conversions.
+* Pending commissions.
+* Approved commissions.
+* Rejected or reversed commissions.
+* Payout history.
+* Affiliate performance reports.
+* Commission terms.
+* Notifications.
+
+Approved affiliates should be able to generate unique tracking links for eligible products.
+
+Track affiliate referrals using secure referral identifiers and server-side records.
+
+Attribute a qualifying order to the appropriate affiliate using a clearly defined attribution rule. Prevent self-referrals and obvious duplicate or fraudulent conversions.
+
+Commissions must be calculated from configured rates and eligible order values, not from a value submitted by the browser.
+
+Use configurable commission rates, with clear rules for:
+
+* Commission percentage or fixed amount.
+* Eligible products.
+* Commission calculation basis.
+* Pending period.
+* Approval.
+* Refunds and cancellations.
+* Reversals.
+* Payout eligibility.
+
+Default to pending commission until the associated order is confirmed and the configured verification or refund period has passed.
+
+Do not mark unpaid or cancelled orders as completed affiliate sales.
+
+Provide a clear statement explaining that affiliate income is not guaranteed and depends on qualifying sales.
+
+The administrator must be able to approve affiliates, manage commission settings, investigate conversions and process eligible commission payouts.
+
+10. PAID PROMOTIONAL CAMPAIGNS
+
+Build a campaign marketplace connecting businesses with digital promoters.
+
+Businesses must be able to create campaign requests containing:
+
+* Campaign title.
+* Business or brand.
+* Campaign description.
+* Product or service being promoted.
+* Target audience.
+* Preferred social media channels.
+* Campaign objectives.
+* Required deliverables.
+* Campaign budget.
+* Start and end dates.
+* Eligibility requirements.
+* Submission requirements.
+* Campaign status.
+
+Support campaign objectives such as:
+
+* Promotional content creation.
+* Product demonstrations.
+* Brand awareness.
+* Website visits.
+* Genuine customer enquiries.
+* Tracked affiliate sales.
+* Other approved marketing deliverables.
+
+Do not design the platform around fake followers, fake engagement, spam, deceptive reviews or artificial manipulation of platform metrics.
+
+Promoter experience
+
+Users must be able to:
+
+* Browse available campaigns.
+* Review eligibility and payment terms.
+* Apply for or accept eligible campaigns.
+* View approved campaign instructions.
+* Submit evidence of completed work.
+* Check submission status.
+* Receive approval or rejection reasons.
+* View approved campaign payments.
+* Review campaign history.
+
+Campaign statuses should include:
+Draft, Pending Review, Approved, Open, In Progress, Submitted, Revision Requested, Completed, Rejected and Cancelled, as appropriate.
+
+Businesses must be able to review submissions and approve or reject work with a reason.
+
+Campaign financial controls
+
+The administrator must be able to configure campaign fees and payment arrangements.
+
+Do not claim a promoter has earned money simply because they clicked a button or uploaded evidence.
+
+Record the agreed payment amount, campaign funding status, approved deliverables and payment status.
+
+Do not release campaign payments without the required approval and available funds.
+
+Clearly distinguish campaign fees, platform revenue and promoter compensation.
+
+If an escrow or automated payout system is not implemented, do not describe the campaign balance as legally protected escrow or pretend that funds are automatically paid.
+
+11. DIGITAL LEARNING
+
+Create a dedicated learning section.
+
+Support:
+
+* Course categories.
+* Course catalogue.
+* Course detail pages.
+* Course creator profiles.
+* Course images.
+* Course descriptions.
+* Pricing.
+* Curriculum and lessons.
+* Video, text and downloadable learning materials.
+* Course purchase.
+* Enrolled courses.
+* Learning progress.
+* Course completion status.
+
+Only verified purchasers or authorised users may access paid course content.
+
+Creators must be able to create and manage courses, subject to administrator approval.
+
+Support configurable platform commissions on eligible course sales.
+
+Do not issue completion certificates unless the relevant course completion requirements have actually been satisfied.
+
+12. EVENT TICKETING
+
+Create an event marketplace with categories such as:
+
+* Music and Entertainment.
+* Business and Networking.
+* Education and Workshops.
+* Technology.
+* Lifestyle and Community.
+* Other Events.
+
+Event organisers must be able to create events with:
+
+* Event name.
+* Description.
+* Cover image.
+* Category.
+* Venue or online event link.
+* City and country.
+* Date and time.
+* Ticket types.
+* Ticket prices.
+* Ticket quantities.
+* Sales start and end dates.
+* Event status.
+
+Customers must be able to browse events, purchase tickets and access their ticket history.
+
+Generate a unique ticket identifier and QR code for each eligible ticket after confirmed payment.
+
+Provide an organiser dashboard with event management, ticket sales and attendee records.
+
+Prevent overselling by reserving or decrementing available ticket inventory safely during checkout.
+
+The administrator must be able to review events, moderate listings and manage refunds or cancellations according to configured policies.
+
+13. CART, CHECKOUT AND ORDER MANAGEMENT
+
+Implement a consistent checkout process for supported products and services.
+
+The system must:
+
+* Validate prices on the server.
+* Verify product availability.
+* Calculate applicable platform fees.
+* Calculate delivery charges for physical goods where applicable.
+* Record order items and price snapshots.
+* Handle pending, successful, failed and cancelled payments.
+* Prevent duplicate payment processing.
+* Update stock only according to a safe order and payment flow.
+* Provide customers with order history and status.
+* Provide vendors with the orders relevant to their products.
+
+If a cart contains items with incompatible fulfilment or payment requirements, handle this explicitly through separate orders or a clear checkout flow.
+
+Do not allow customers to purchase unavailable products or modify prices through browser requests.
+
+14. PAYMENTS AND FINANCIAL LEDGERS
+
+Design the payment system so that Paystack can be configured for supported transactions and mobile money can be explored in a future integration.
+
+Use environment variables for credentials, for example:
+PAYSTACK_SECRET_KEY
+PAYSTACK_PUBLIC_KEY
+PAYSTACK_WEBHOOK_SECRET
+APP_BASE_URL
+
+Never expose secret keys to the frontend, commit them to source control or print them in logs.
+
+Use Paystack’s documented payment flow and official server-side verification mechanisms.
+
+A payment must not be marked successful merely because the browser returns to a success page. Verify payment status on the server and validate the amount, currency, reference and transaction identity.
+
+Implement verified webhook handling where supported, including signature validation, duplicate-event protection and idempotent processing.
+
+If credentials are missing, implement a clearly labelled test or configuration state. Do not fabricate successful payments.
+
+Supported financial records
+
+Create appropriate database records for:
+
+* Customer payments.
+* Vendor sales proceeds.
+* Platform fees.
+* Affiliate commissions.
+* Promotional campaign obligations.
+* Course creator proceeds.
+* Event organiser proceeds.
+* Refunds and reversals.
+* Payout requests.
+* Payout status and references.
+
+Use a transaction ledger with immutable financial entries and auditable references.
+
+Do not use one user-editable balance field as the source of truth for all financial activity.
+
+Do not count pending commissions, unpaid orders or test transactions as withdrawable earnings.
+
+Do not use an administrator’s manual balance adjustment to simulate a real payment.
+
+Any manual financial adjustment must require administrator permission, a reason, an audit record and appropriate validation.
+
+Wallet and withdrawals
+
+Provide a wallet interface that displays:
+
+* Available balance.
+* Pending balance.
+* Completed transactions.
+* Payout requests.
+* Withdrawal history.
+
+Only show a withdrawable balance when the underlying funds are genuinely eligible under the configured settlement rules.
+
+Support a payout request workflow with configurable minimum withdrawal, fees and payment methods.
+
+Where automated payouts are unavailable, administrators may review and process approved payouts manually, with clear records and status updates.
+
+Do not claim a payout was completed until it has actually been processed and confirmed.
+
+Support Ghanaian cedi (GHS) as the initial currency. Structure currency settings so additional supported currencies can be added in the future.
+
+15. ADMINISTRATOR LOGIN AND FULL ADMIN PANEL
+
+This is mandatory. Build a separate, secure administrator login and a fully functional administrator dashboard. Do not omit the admin panel.
+
+Create a dedicated route such as /admin/login and a protected admin area such as /admin.
+
+Administrator authentication must be separate in permissions from ordinary user accounts.
+
+Unauthorised users must not be able to access admin routes or administrator API endpoints, even if they manually enter the URL.
+
+Create an initial administrator securely using environment-based configuration or a documented one-time bootstrap process. Never hardcode a public admin password.
+
+Admin dashboard overview
+
+Display useful, database-backed metrics:
+
+* Total registered users.
+* Active users.
+* Total vendors.
+* Pending vendor approvals.
+* Total products.
+* Physical products.
+* Digital products.
+* Pending product approvals.
+* Total orders.
+* Confirmed transaction volume.
+* Platform revenue.
+* Pending commissions.
+* Pending payout requests.
+* Active promotional campaigns.
+* Pending campaign submissions.
+* Published courses.
+* Active events.
+* Tickets sold.
+
+Clearly distinguish gross transaction volume, platform revenue, pending funds and actual available funds.
+
+If no real records exist, show zero or an appropriate empty state. Never invent statistics.
+
+Admin management modules
+
+Create functional sections for:
+
+A. User Management
+
+* Search and filter users.
+* View user profiles.
+* Assign or revoke permitted roles.
+* Suspend and reactivate accounts.
+* Review account status.
+* Inspect relevant activity and audit records.
+
+B. Vendor Management
+
+* Review vendor applications.
+* Approve or reject vendors.
+* Configure membership fees and durations.
+* View vendor stores and products.
+* Suspend vendor listings or accounts when justified.
+* Review membership payments and renewals.
+
+C. Product Management
+
+* View all products.
+* Filter by physical or digital type.
+* Manage category trees and subcategories.
+* Approve, reject, publish or unpublish listings.
+* Review reported products.
+* Configure featured product placements.
+* Manage product moderation.
+
+D. Orders and Transactions
+
+* View orders and transaction details.
+* Filter by status, date and payment method.
+* Verify payment records.
+* Review refunds and reversals.
+* Inspect transaction references.
+* Export authorised reports where appropriate.
+
+E. Affiliate Management
+
+* Review and approve affiliates.
+* Manage affiliate commission settings.
+* Inspect clicks, conversions and eligible sales.
+* Investigate suspicious activity.
+* Approve eligible commissions.
+* Review and process payout requests.
+
+F. Promotional Campaign Management
+
+* Review campaign requests.
+* Approve or reject campaigns.
+* Moderate campaign descriptions.
+* Monitor campaign budgets and funding status.
+* Review promoter applications and submissions.
+* Resolve disputes.
+* Track approved deliverables and payment obligations.
+
+G. Digital Learning Management
+
+* Review course creator applications.
+* Approve, reject or unpublish courses.
+* Manage course categories.
+* View enrolments and eligible sales.
+* Configure platform commissions.
+
+H. Event Management
+
+* Review organisers and events.
+* Approve or reject listings.
+* Manage event categories.
+* View ticket sales and attendee records.
+* Handle event cancellations and refund workflows.
+
+I. Wallet, Ledger and Payouts
+
+* View financial ledgers.
+* Review eligible balances.
+* Review withdrawal requests.
+* Approve or reject payout requests with reasons.
+* Record verified manual payout references.
+* Record justified financial adjustments with mandatory audit trails.
+* Export financial reports to authorised formats.
+
+J. Platform Settings
+
+* Platform name and logo.
+* Brand colours.
+* Vendor membership pricing.
+* Affiliate commission defaults.
+* Sales commission defaults.
+* Promotional campaign fees.
+* Featured placement pricing.
+* Course commissions.
+* Ticketing fees.
+* Withdrawal settings.
+* Supported currencies.
+* Payment configuration status.
+* Maintenance mode.
+* Terms and policies.
+
+K. Categories and Content
+
+* Manage physical product categories.
+* Manage digital product categories separately.
+* Manage course categories.
+* Manage event categories.
+* Manage homepage banners and featured sections.
+* Manage FAQs and public content.
+
+L. Support and Reports
+
+* View user support requests.
+* Respond to and update support tickets.
+* View platform activity.
+* Review reported content.
+* Generate operational and financial reports.
+
+Admin security
+
+Use server-side authorisation for every privileged action.
+
+Record administrator actions in an audit log, including actor, action, target record, timestamp and reason where appropriate.
+
+Never allow an administrator action to bypass payment verification, silently fabricate financial transactions or expose passwords and secret credentials.
+
+Use confirmation prompts for sensitive actions such as suspending accounts, rejecting payouts and adjusting financial records.
+
+16. DATABASE DESIGN
+
+Create appropriate relational tables or equivalent structured models for:
+
+* Users.
+* Roles and permissions.
+* User profiles.
+* Vendor profiles.
+* Vendor memberships.
+* Product categories.
+* Products.
+* Product images and digital files.
+* Product variants and inventory.
+* Carts and cart items.
+* Orders and order items.
+* Payments and payment events.
+* Transaction ledger entries.
+* Affiliate profiles.
+* Affiliate links.
+* Affiliate clicks and conversions.
+* Affiliate commissions.
+* Promotional campaigns.
+* Campaign applications.
+* Campaign submissions.
+* Campaign payment obligations.
+* Courses.
+* Course modules and lessons.
+* Course enrolments.
+* Events.
+* Ticket types.
+* Tickets and attendees.
+* Payout requests.
+* Refunds and reversals.
+* Notifications.
+* Support tickets.
+* Platform settings.
+* Administrator audit logs.
+
+Use appropriate primary keys, foreign keys, uniqueness constraints, indexes and timestamps.
+
+Store monetary values using integer minor units or a precise decimal representation. Never use floating-point arithmetic for authoritative financial calculations.
+
+Apply database transactions and locking or equivalent concurrency controls where needed for stock, ticket inventory, commission processing and payments.
+
+17. SECURITY, PRIVACY AND RELIABILITY
+
+Implement:
+
+* Password hashing.
+* Secure sessions or properly configured authentication tokens.
+* Server-side role and ownership checks.
+* Input validation and sanitisation.
+* Rate limiting for sensitive endpoints where supported.
+* CSRF protection where applicable.
+* Safe file upload validation.
+* Protected digital product downloads.
+* Payment webhook verification.
+* Idempotent payment processing.
+* Database constraints.
+* Audit logs for privileged and financial actions.
+* Safe error handling without leaking secrets.
+* Environment-based secret management.
+
+Never trust user-submitted prices, balances, commission amounts, roles, payment statuses or administrator permissions.
+
+Do not allow users to change another user’s data by modifying an ID in an API request.
+
+Use realistic sample catalogue content only for development and clearly distinguish sample data from genuine business transactions. Provide a straightforward way to remove seed data before launch.
+
+18. USER EXPERIENCE AND FUNCTIONAL REQUIREMENTS
+
+Every visible navigation item, CTA and action must lead to a working page or a clearly explained unavailable state.
+
+Implement:
+
+* Loading states.
+* Form validation.
+* Success and error messages.
+* Empty states.
+* Search and filtering.
+* Pagination where appropriate.
+* Responsive layouts.
+* Accessible form labels.
+* Confirmation dialogs for destructive actions.
+* Clear status badges.
+* Useful notifications.
+
+Do not leave dead buttons, placeholder links, fake charts or controls that appear functional but do nothing.
+
+Use realistic example products and courses for development only. Clearly label any seed data and do not fabricate actual customers, sales, reviews, earnings or payments.
+
+19. TESTING AND ACCEPTANCE CRITERIA
+
+Before declaring the build complete, test the following core flows:
+
+1. A customer can register, log in, browse products and view product details.
+2. Physical and digital products use separate categories and correct checkout fields.
+3. A vendor can apply, be approved by an administrator, create a product and manage orders.
+4. An affiliate can obtain a tracking link and see a qualifying conversion only after a verified eligible sale.
+5. A business can create a promotional campaign, and an eligible promoter can submit work for review.
+6. A course creator can create a course, an administrator can approve it, and an authorised purchaser can access it.
+7. An event organiser can create an event, and a customer can purchase and view a ticket after verified payment.
+8. Payment status cannot be forged through frontend requests or return URLs.
+9. A customer cannot access vendor or administrator dashboards without the appropriate permissions.
+10. An administrator can log in through the dedicated admin route and manage users, vendors, categories, products, campaigns, commissions, payouts, settings and reports.
+11. The database persists records after reloads and application restarts.
+12. Mobile and desktop layouts remain usable.
+
+If a payment integration cannot be tested without real credentials, explain that limitation and provide a test-mode setup. Do not claim the integration is production-ready without verification.
+
+20. BUILD PRIORITY
+
+Implement the application in this order, without sacrificing the essential security and data architecture:
+
+1. Project foundation, database, authentication and roles.
+2. Public homepage, branding and navigation.
+3. Separate physical and digital marketplaces with category management.
+4. Customer and vendor dashboards.
+5. Admin login and the complete protected admin panel.
+6. Orders, payment verification and financial records.
+7. Affiliate marketing.
+8. Promotional campaigns.
+9. Digital learning.
+10. Event ticketing.
+11. Reporting, testing, security review and documentation.
+
+The codebase must support the entire planned platform, while the most important user journeys must work end to end.
+
+If time or platform limitations prevent completion of every module, prioritise a working, secure foundation and clearly report which modules are complete, partial or awaiting configuration. Never disguise unfinished functionality as completed.
+
+FINAL INSTRUCTION
+
+Build TaskPay as a cohesive, professional and scalable digital commerce platform—not merely a UI mockup.
+
+Use the supplied specification as the source of truth. Keep the brand consistent, separate physical and digital product categories, implement real database-backed functionality, secure every role and financial operation, and make the administrator panel a first-class part of the application.
+
+When finished, provide a concise summary of:
+
+* What is implemented and tested.
+* How to run the application.
+* Required environment variables.
+* How to access the administrator login securely.
+* Which integrations need credentials.
+* Any incomplete features or known limitations.
+
+Do not claim that features work unless they have actually been implemented and tested.

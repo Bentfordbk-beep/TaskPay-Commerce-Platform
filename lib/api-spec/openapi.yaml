@@ -1,15 +1,34 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: TaskPay commerce and opportunity platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: catalog
+    description: Marketplace and public discovery
+  - name: account
+    description: Signed-in account and dashboard
+  - name: vendors
+    description: Vendor applications and products
+  - name: commerce
+    description: Cart, orders, and payment configuration
+  - name: learning
+    description: Courses and enrolments
+  - name: campaigns
+    description: Promotional campaign workflows
+  - name: events
+    description: Events and ticketing
+  - name: affiliate
+    description: Product referral links and commissions
+  - name: admin
+    description: Protected platform administration
+  - name: support
+    description: User support requests
 paths:
   /healthz:
     get:
@@ -24,8 +43,788 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /home:
+    get:
+      operationId: getHomeSnapshot
+      tags: [catalog]
+      summary: Get public homepage content
+      responses:
+        "200":
+          description: Homepage data backed by the catalogue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeSnapshot"
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [catalog]
+      summary: List categories for one product type
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/CategoryScope"
+      responses:
+        "200":
+          description: Category tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [catalog]
+      summary: Search and browse products
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProductType"
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, price-low, price-high]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 48
+            default: 12
+      responses:
+        "200":
+          description: Page of published products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductPage"
+    post:
+      operationId: createProduct
+      tags: [vendors]
+      summary: Create a product for the current approved vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      tags: [catalog]
+      summary: Get product details
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+    patch:
+      operationId: updateProduct
+      tags: [vendors]
+      summary: Update a product owned by the current vendor
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: archiveProduct
+      tags: [vendors]
+      summary: Archive a product owned by the current vendor
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "204":
+          description: Product archived
+  /me:
+    get:
+      operationId: getMe
+      tags: [account]
+      summary: Get the current signed-in profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Sign-in required
+    patch:
+      operationId: updateMe
+      tags: [account]
+      summary: Update basic profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [account]
+      summary: Get account dashboard summary and recent activity
+      responses:
+        "200":
+          description: Current account summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSnapshot"
+  /vendors/me:
+    get:
+      operationId: getMyVendor
+      tags: [vendors]
+      summary: Get the current user's vendor application and store
+      responses:
+        "200":
+          description: Vendor profile or application status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorProfile"
+        "404":
+          description: No vendor application
+    post:
+      operationId: applyAsVendor
+      tags: [vendors]
+      summary: Submit a vendor application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorApplicationInput"
+      responses:
+        "201":
+          description: Vendor application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorProfile"
+  /vendors/me/products:
+    get:
+      operationId: listMyProducts
+      tags: [vendors]
+      summary: List products owned by the current vendor
+      responses:
+        "200":
+          description: Vendor product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /cart:
+    get:
+      operationId: getCart
+      tags: [commerce]
+      summary: Get the current user's cart
+      responses:
+        "200":
+          description: Cart contents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+  /cart/items:
+    post:
+      operationId: addCartItem
+      tags: [commerce]
+      summary: Add an available product to the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemInput"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+  /cart/items/{itemId}:
+    delete:
+      operationId: removeCartItem
+      tags: [commerce]
+      summary: Remove a cart item owned by the current user
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+  /checkout:
+    post:
+      operationId: beginCheckout
+      tags: [commerce]
+      summary: Create a pending checkout after server-side price and stock validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "201":
+          description: Pending order and payment instructions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResult"
+        "503":
+          description: Payment provider is not configured
+  /orders/me:
+    get:
+      operationId: listMyOrders
+      tags: [commerce]
+      summary: List orders for the current user
+      responses:
+        "200":
+          description: Customer orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [learning]
+      summary: Browse approved courses
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Published courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+    post:
+      operationId: createCourse
+      tags: [learning]
+      summary: Create a course for the current approved creator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseInput"
+      responses:
+        "201":
+          description: Course submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+  /courses/{courseId}:
+    get:
+      operationId: getCourse
+      tags: [learning]
+      summary: Get public course details
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+  /courses/{courseId}/enrol:
+    post:
+      operationId: enrolInCourse
+      tags: [learning]
+      summary: Enrol after a verified eligible purchase
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Enrolment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enrolment"
+        "403":
+          description: A verified course purchase is required
+  /enrolments/me:
+    get:
+      operationId: listMyEnrolments
+      tags: [learning]
+      summary: List the current user's course enrolments
+      responses:
+        "200":
+          description: Enrolments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrolment"
+  /campaigns:
+    get:
+      operationId: listCampaigns
+      tags: [campaigns]
+      summary: Browse active campaign opportunities
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Open campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Campaign"
+    post:
+      operationId: createCampaign
+      tags: [campaigns]
+      summary: Create a campaign request for review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignInput"
+      responses:
+        "201":
+          description: Campaign request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+  /campaigns/{campaignId}/apply:
+    post:
+      operationId: applyToCampaign
+      tags: [campaigns]
+      summary: Apply to an eligible active campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignApplication"
+  /campaign-submissions:
+    get:
+      operationId: listMyCampaignSubmissions
+      tags: [campaigns]
+      summary: List the current user's campaign applications and submissions
+      responses:
+        "200":
+          description: Current user's submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CampaignApplication"
+    post:
+      operationId: submitCampaignWork
+      tags: [campaigns]
+      summary: Submit work for an accepted campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignSubmissionInput"
+      responses:
+        "201":
+          description: Work submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignApplication"
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: Browse approved upcoming events
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Upcoming events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+    post:
+      operationId: createEvent
+      tags: [events]
+      summary: Create an event listing for review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInput"
+      responses:
+        "201":
+          description: Event listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+  /events/{eventId}/tickets:
+    post:
+      operationId: purchaseTicket
+      tags: [events]
+      summary: Begin a pending ticket checkout with inventory reservation
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketPurchaseInput"
+      responses:
+        "201":
+          description: Pending ticket checkout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResult"
+        "503":
+          description: Payment provider is not configured
+  /tickets/me:
+    get:
+      operationId: listMyTickets
+      tags: [events]
+      summary: List the current user's verified tickets
+      responses:
+        "200":
+          description: Tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ticket"
+  /affiliate/overview:
+    get:
+      operationId: getAffiliateOverview
+      tags: [affiliate]
+      summary: Get affiliate dashboard and eligible products
+      responses:
+        "200":
+          description: Affiliate overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateOverview"
+  /affiliate/links:
+    get:
+      operationId: listAffiliateLinks
+      tags: [affiliate]
+      summary: List the current user's tracking links
+      responses:
+        "200":
+          description: Tracking links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AffiliateLink"
+    post:
+      operationId: createAffiliateLink
+      tags: [affiliate]
+      summary: Create a referral link for an eligible product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AffiliateLinkInput"
+      responses:
+        "201":
+          description: Tracking link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateLink"
+  /affiliate/apply:
+    post:
+      operationId: applyForAffiliate
+      tags: [affiliate]
+      summary: Request affiliate programme access
+      responses:
+        "201":
+          description: Affiliate application status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AffiliateOverview"
+  /wallet:
+    get:
+      operationId: getWallet
+      tags: [account]
+      summary: Get eligible and pending financial activity from the ledger
+      responses:
+        "200":
+          description: Ledger-backed wallet summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletSnapshot"
+  /payout-requests:
+    post:
+      operationId: requestPayout
+      tags: [account]
+      summary: Request payout from eligible ledger funds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayoutRequestInput"
+      responses:
+        "201":
+          description: Payout request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayoutRequest"
+        "400":
+          description: Insufficient eligible funds or invalid request
+  /support-requests:
+    post:
+      operationId: createSupportRequest
+      tags: [support]
+      summary: Create a support request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupportRequestInput"
+      responses:
+        "201":
+          description: Support request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportRequest"
+  /admin/summary:
+    get:
+      operationId: getAdminSummary
+      tags: [admin]
+      summary: Get database-backed platform counts
+      responses:
+        "200":
+          description: Admin dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSummary"
+        "403":
+          description: Administrator access required
+  /admin/records/{recordType}:
+    get:
+      operationId: listAdminRecords
+      tags: [admin]
+      summary: List records in an administrator-managed area
+      parameters:
+        - name: recordType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [users, vendors, products, orders, campaigns, campaign-submissions, courses, events, affiliates, payouts, support]
+      responses:
+        "200":
+          description: Admin record list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminRecord"
+        "403":
+          description: Administrator access required
+  /admin/records/{recordType}/{recordId}:
+    patch:
+      operationId: reviewAdminRecord
+      tags: [admin]
+      summary: Review a pending record with a recorded reason
+      parameters:
+        - name: recordType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [users, vendors, products, campaigns, campaign-submissions, courses, events, affiliates, payouts, support]
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminReviewInput"
+      responses:
+        "200":
+          description: Reviewed record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminRecord"
+        "403":
+          description: Administrator access required
+  /admin/settings:
+    get:
+      operationId: getAdminSettings
+      tags: [admin]
+      summary: Get platform settings and payment configuration state
+      responses:
+        "200":
+          description: Platform settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
+    patch:
+      operationId: updateAdminSettings
+      tags: [admin]
+      summary: Update platform fee and marketplace settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformSettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
 components:
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
   schemas:
+    ProductType:
+      type: string
+      enum: [physical, digital]
+    CategoryScope:
+      type: string
+      enum: [physical, digital, course, event]
     HealthStatus:
       type: object
       properties:
@@ -33,4 +832,461 @@ components:
           type: string
       required:
         - status
+    Category:
+      type: object
+      required: [id, name, type, parentId]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        type: { $ref: "#/components/schemas/CategoryScope" }
+        parentId: { type: ["string", "null"] }
+        productCount: { type: integer }
+    Product:
+      type: object
+      required: [id, title, description, type, categoryId, categoryName, priceMinor, currency, vendorId, vendorName, imageUrl, stockQuantity, status, affiliateEligible, commissionRateBps, condition, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        type: { $ref: "#/components/schemas/ProductType" }
+        categoryId: { type: string }
+        categoryName: { type: string }
+        priceMinor: { type: integer }
+        salePriceMinor: { type: ["integer", "null"] }
+        currency: { type: string }
+        vendorId: { type: string }
+        vendorName: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        stockQuantity: { type: ["integer", "null"] }
+        status: { type: string, enum: [pending, published, rejected, archived] }
+        affiliateEligible: { type: boolean }
+        commissionRateBps: { type: integer }
+        condition: { type: ["string", "null"] }
+        deliverySummary: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    ProductPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Product" }
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+    ProductInput:
+      type: object
+      required: [title, description, type, categoryId, priceMinor]
+      properties:
+        title: { type: string, minLength: 2, maxLength: 160 }
+        description: { type: string, minLength: 10, maxLength: 8000 }
+        type: { $ref: "#/components/schemas/ProductType" }
+        categoryId: { type: string }
+        priceMinor: { type: integer, minimum: 1 }
+        salePriceMinor: { type: ["integer", "null"], minimum: 1 }
+        imageUrl: { type: ["string", "null"], format: uri }
+        stockQuantity: { type: ["integer", "null"], minimum: 0 }
+        condition: { type: ["string", "null"] }
+        deliverySummary: { type: ["string", "null"] }
+        affiliateEligible: { type: boolean, default: false }
+        commissionRateBps: { type: integer, minimum: 0, maximum: 5000, default: 0 }
+    ProductUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 160 }
+        description: { type: string, minLength: 10, maxLength: 8000 }
+        categoryId: { type: string }
+        priceMinor: { type: integer, minimum: 1 }
+        salePriceMinor: { type: ["integer", "null"], minimum: 1 }
+        imageUrl: { type: ["string", "null"], format: uri }
+        stockQuantity: { type: ["integer", "null"], minimum: 0 }
+        condition: { type: ["string", "null"] }
+        deliverySummary: { type: ["string", "null"] }
+        affiliateEligible: { type: boolean }
+        commissionRateBps: { type: integer, minimum: 0, maximum: 5000 }
+    UserProfile:
+      type: object
+      required: [id, email, fullName, phone, roles, status]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        phone: { type: ["string", "null"] }
+        avatarUrl: { type: ["string", "null"] }
+        roles:
+          type: array
+          items: { type: string }
+        status: { type: string, enum: [active, suspended] }
+    ProfileUpdate:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 1, maxLength: 140 }
+        phone: { type: ["string", "null"], maxLength: 40 }
+    VendorProfile:
+      type: object
+      required: [id, userId, storeName, description, country, city, status, createdAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        storeName: { type: string }
+        description: { type: string }
+        country: { type: string }
+        city: { type: string }
+        logoUrl: { type: ["string", "null"] }
+        status: { type: string, enum: [pending, approved, rejected, suspended] }
+        createdAt: { type: string, format: date-time }
+    VendorApplicationInput:
+      type: object
+      required: [storeName, description, country, city, contactPhone]
+      properties:
+        storeName: { type: string, minLength: 2, maxLength: 160 }
+        description: { type: string, minLength: 20, maxLength: 4000 }
+        country: { type: string, minLength: 2, maxLength: 80 }
+        city: { type: string, minLength: 2, maxLength: 120 }
+        logoUrl: { type: ["string", "null"], format: uri }
+        contactPhone: { type: string, minLength: 7, maxLength: 40 }
+    HomeSnapshot:
+      type: object
+      required: [featuredPhysical, featuredDigital, categories, courses, events, campaigns, paymentStatus]
+      properties:
+        featuredPhysical:
+          type: array
+          items: { $ref: "#/components/schemas/Product" }
+        featuredDigital:
+          type: array
+          items: { $ref: "#/components/schemas/Product" }
+        categories:
+          type: array
+          items: { $ref: "#/components/schemas/Category" }
+        courses:
+          type: array
+          items: { $ref: "#/components/schemas/Course" }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/Event" }
+        campaigns:
+          type: array
+          items: { $ref: "#/components/schemas/Campaign" }
+        paymentStatus: { type: string, enum: [configured, unconfigured] }
+    DashboardSnapshot:
+      type: object
+      required: [user, orderCount, courseCount, ticketCount, savedCount, recentOrders]
+      properties:
+        user: { $ref: "#/components/schemas/UserProfile" }
+        orderCount: { type: integer }
+        courseCount: { type: integer }
+        ticketCount: { type: integer }
+        savedCount: { type: integer }
+        recentOrders:
+          type: array
+          items: { $ref: "#/components/schemas/Order" }
+    CartItem:
+      type: object
+      required: [id, productId, title, type, priceMinor, quantity, imageUrl]
+      properties:
+        id: { type: string }
+        productId: { type: string }
+        title: { type: string }
+        type: { $ref: "#/components/schemas/ProductType" }
+        priceMinor: { type: integer }
+        quantity: { type: integer }
+        imageUrl: { type: ["string", "null"] }
+    Cart:
+      type: object
+      required: [items, subtotalMinor, currency]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CartItem" }
+        subtotalMinor: { type: integer }
+        currency: { type: string }
+    CartItemInput:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: string }
+        quantity: { type: integer, minimum: 1, maximum: 20 }
+    CheckoutInput:
+      type: object
+      properties:
+        shippingName: { type: string }
+        shippingPhone: { type: string }
+        shippingAddress: { type: string }
+    CheckoutResult:
+      type: object
+      required: [orderId, status, paymentStatus, totalMinor, currency, message]
+      properties:
+        orderId: { type: string }
+        status: { type: string }
+        paymentStatus: { type: string, enum: [pending, paid, failed, cancelled] }
+        totalMinor: { type: integer }
+        currency: { type: string }
+        authorizationUrl: { type: ["string", "null"], format: uri }
+        message: { type: string }
+    Order:
+      type: object
+      required: [id, orderNumber, status, paymentStatus, totalMinor, currency, itemCount, createdAt]
+      properties:
+        id: { type: string }
+        orderNumber: { type: string }
+        status: { type: string }
+        paymentStatus: { type: string, enum: [pending, paid, failed, cancelled] }
+        totalMinor: { type: integer }
+        currency: { type: string }
+        itemCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+    Course:
+      type: object
+      required: [id, title, description, creatorName, priceMinor, currency, categoryId, status, lessonCount]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        creatorName: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        priceMinor: { type: integer }
+        currency: { type: string }
+        categoryId: { type: string }
+        status: { type: string, enum: [pending, published, rejected, archived] }
+        lessonCount: { type: integer }
+    CourseInput:
+      type: object
+      required: [title, description, priceMinor, categoryId]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 180 }
+        description: { type: string, minLength: 20, maxLength: 8000 }
+        imageUrl: { type: ["string", "null"], format: uri }
+        priceMinor: { type: integer, minimum: 0 }
+        categoryId: { type: string }
+    Enrolment:
+      type: object
+      required: [id, courseId, courseTitle, progressPercent, status]
+      properties:
+        id: { type: string }
+        courseId: { type: string }
+        courseTitle: { type: string }
+        progressPercent: { type: integer, minimum: 0, maximum: 100 }
+        status: { type: string, enum: [active, completed] }
+    Campaign:
+      type: object
+      required: [id, title, businessName, description, objective, budgetMinor, currency, status]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        businessName: { type: string }
+        description: { type: string }
+        objective: { type: string }
+        budgetMinor: { type: integer }
+        currency: { type: string }
+        status: { type: string, enum: [pending_review, open, in_progress, completed, rejected, cancelled] }
+    CampaignInput:
+      type: object
+      required: [title, businessName, description, objective, budgetMinor, startDate, endDate]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 180 }
+        businessName: { type: string, minLength: 2, maxLength: 160 }
+        description: { type: string, minLength: 20, maxLength: 8000 }
+        objective: { type: string, minLength: 3, maxLength: 100 }
+        budgetMinor: { type: integer, minimum: 1 }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+    CampaignApplication:
+      type: object
+      required: [id, campaignId, campaignTitle, status, submittedAt]
+      properties:
+        id: { type: string }
+        campaignId: { type: string }
+        campaignTitle: { type: string }
+        status: { type: string, enum: [applied, accepted, submitted, revision_requested, approved, rejected] }
+        evidenceUrl: { type: ["string", "null"], format: uri }
+        feedback: { type: ["string", "null"] }
+        submittedAt: { type: string, format: date-time }
+    CampaignSubmissionInput:
+      type: object
+      required: [applicationId, evidenceUrl, notes]
+      properties:
+        applicationId: { type: string }
+        evidenceUrl: { type: string, format: uri }
+        notes: { type: string, maxLength: 3000 }
+    Event:
+      type: object
+      required: [id, title, description, categoryId, venue, city, country, startsAt, status, lowestPriceMinor, currency]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        categoryId: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        venue: { type: string }
+        city: { type: string }
+        country: { type: string }
+        startsAt: { type: string, format: date-time }
+        status: { type: string, enum: [pending, published, rejected, cancelled] }
+        lowestPriceMinor: { type: integer }
+        currency: { type: string }
+    EventInput:
+      type: object
+      required: [title, description, categoryId, venue, city, country, startsAt, ticketName, ticketPriceMinor, ticketQuantity]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 180 }
+        description: { type: string, minLength: 20, maxLength: 8000 }
+        categoryId: { type: string }
+        imageUrl: { type: ["string", "null"], format: uri }
+        venue: { type: string, minLength: 2, maxLength: 240 }
+        city: { type: string, minLength: 2, maxLength: 120 }
+        country: { type: string, minLength: 2, maxLength: 80 }
+        startsAt: { type: string, format: date-time }
+        ticketName: { type: string, minLength: 2, maxLength: 120 }
+        ticketPriceMinor: { type: integer, minimum: 0 }
+        ticketQuantity: { type: integer, minimum: 1, maximum: 100000 }
+    TicketPurchaseInput:
+      type: object
+      required: [quantity]
+      properties:
+        quantity: { type: integer, minimum: 1, maximum: 10 }
+    Ticket:
+      type: object
+      required: [id, eventId, eventTitle, status, ticketIdentifier]
+      properties:
+        id: { type: string }
+        eventId: { type: string }
+        eventTitle: { type: string }
+        status: { type: string, enum: [pending, valid, cancelled, refunded] }
+        ticketIdentifier: { type: string }
+        qrData: { type: ["string", "null"] }
+    AffiliateLink:
+      type: object
+      required: [id, productId, productTitle, code, url, clickCount, conversionCount]
+      properties:
+        id: { type: string }
+        productId: { type: string }
+        productTitle: { type: string }
+        code: { type: string }
+        url: { type: string }
+        clickCount: { type: integer }
+        conversionCount: { type: integer }
+    AffiliateLinkInput:
+      type: object
+      required: [productId]
+      properties:
+        productId: { type: string }
+    AffiliateOverview:
+      type: object
+      required: [status, links, clicks, conversions, pendingCommissionMinor, approvedCommissionMinor, currency]
+      properties:
+        status: { type: string, enum: [pending, approved, rejected] }
+        links:
+          type: array
+          items: { $ref: "#/components/schemas/AffiliateLink" }
+        clicks: { type: integer }
+        conversions: { type: integer }
+        pendingCommissionMinor: { type: integer }
+        approvedCommissionMinor: { type: integer }
+        currency: { type: string }
+    WalletSnapshot:
+      type: object
+      required: [availableMinor, pendingMinor, currency, payouts]
+      properties:
+        availableMinor: { type: integer }
+        pendingMinor: { type: integer }
+        currency: { type: string }
+        payouts:
+          type: array
+          items: { $ref: "#/components/schemas/PayoutRequest" }
+    PayoutRequestInput:
+      type: object
+      required: [amountMinor, method]
+      properties:
+        amountMinor: { type: integer, minimum: 1 }
+        method: { type: string, enum: [mobile_money, bank_transfer] }
+        destination: { type: string, minLength: 3, maxLength: 200 }
+    PayoutRequest:
+      type: object
+      required: [id, amountMinor, currency, status, createdAt]
+      properties:
+        id: { type: string }
+        amountMinor: { type: integer }
+        currency: { type: string }
+        status: { type: string, enum: [pending, approved, rejected, paid] }
+        createdAt: { type: string, format: date-time }
+    SupportRequestInput:
+      type: object
+      required: [subject, message]
+      properties:
+        subject: { type: string, minLength: 3, maxLength: 180 }
+        message: { type: string, minLength: 10, maxLength: 5000 }
+    SupportRequest:
+      type: object
+      required: [id, subject, message, status, createdAt]
+      properties:
+        id: { type: string }
+        subject: { type: string }
+        message: { type: string }
+        status: { type: string, enum: [open, in_progress, resolved] }
+        createdAt: { type: string, format: date-time }
+    AdminSummary:
+      type: object
+      required: [users, activeUsers, vendors, pendingVendors, products, physicalProducts, digitalProducts, pendingProducts, orders, paidVolumeMinor, platformRevenueMinor, pendingPayouts, campaigns, pendingSubmissions, pendingCommissionsMinor, courses, events, ticketsSold, currency]
+      properties:
+        users: { type: integer }
+        activeUsers: { type: integer }
+        vendors: { type: integer }
+        pendingVendors: { type: integer }
+        products: { type: integer }
+        physicalProducts: { type: integer }
+        digitalProducts: { type: integer }
+        pendingProducts: { type: integer }
+        orders: { type: integer }
+        paidVolumeMinor: { type: integer }
+        platformRevenueMinor: { type: integer }
+        pendingPayouts: { type: integer }
+        campaigns: { type: integer }
+        pendingSubmissions: { type: integer }
+        pendingCommissionsMinor: { type: integer }
+        courses: { type: integer }
+        events: { type: integer }
+        ticketsSold: { type: integer }
+        currency: { type: string }
+    AdminRecord:
+      type: object
+      required: [id, recordType, title, status, createdAt]
+      properties:
+        id: { type: string }
+        recordType: { type: string }
+        title: { type: string }
+        status: { type: string }
+        ownerName: { type: ["string", "null"] }
+        detail: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    AdminReviewInput:
+      type: object
+      required: [status, reason]
+      properties:
+        status: { type: string, minLength: 2, maxLength: 40 }
+        reason: { type: string, minLength: 3, maxLength: 1000 }
+    PlatformSettings:
+      type: object
+      required: [vendorMembershipMinor, vendorMembershipDays, salesCommissionBps, affiliateDefaultBps, campaignFeeBps, courseCommissionBps, ticketFeeBps, minimumPayoutMinor, paymentStatus, currency]
+      properties:
+        vendorMembershipMinor: { type: integer }
+        vendorMembershipDays: { type: integer }
+        salesCommissionBps: { type: integer }
+        affiliateDefaultBps: { type: integer }
+        campaignFeeBps: { type: integer }
+        courseCommissionBps: { type: integer }
+        ticketFeeBps: { type: integer }
+        minimumPayoutMinor: { type: integer }
+        paymentStatus: { type: string, enum: [configured, unconfigured] }
+        currency: { type: string }
+    PlatformSettingsUpdate:
+      type: object
+      properties:
+        vendorMembershipMinor: { type: integer, minimum: 0 }
+        vendorMembershipDays: { type: integer, minimum: 1, maximum: 730 }
+        salesCommissionBps: { type: integer, minimum: 0, maximum: 5000 }
+        affiliateDefaultBps: { type: integer, minimum: 0, maximum: 5000 }
+        campaignFeeBps: { type: integer, minimum: 0, maximum: 5000 }
+        courseCommissionBps: { type: integer, minimum: 0, maximum: 5000 }
+        ticketFeeBps: { type: integer, minimum: 0, maximum: 5000 }
+        minimumPayoutMinor: { type: integer, minimum: 0 }
 

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "TaskPay"
+description = "A mobile-first commerce and opportunity platform for customers, vendors, affiliates, creators, campaign promoters, and event organisers in Ghana. Browse physical and digital products separately, discover learning and events, and manage trusted commerce workflows."
+version = "1.0.0"
+id = "artifacts/taskpay"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23513
+
+[services.development]
+run = "pnpm --filter @workspace/taskpay run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/taskpay", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/taskpay/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23513"
+BASE_PATH = "/"
