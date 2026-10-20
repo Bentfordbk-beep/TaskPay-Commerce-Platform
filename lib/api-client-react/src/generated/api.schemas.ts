@@ -610,6 +610,7 @@ export const AffiliateOverviewStatus = {
 
 export interface AffiliateOverview {
   status: AffiliateOverviewStatus;
+  applicationSubmitted: boolean;
   links: AffiliateLink[];
   clicks: number;
   conversions: number;

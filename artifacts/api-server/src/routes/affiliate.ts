@@ -30,6 +30,7 @@ async function affiliateView(userId: string) {
   if (!profile) {
     return {
       status: "pending",
+      applicationSubmitted: false,
       links: [],
       clicks: 0,
       conversions: 0,
@@ -57,6 +58,7 @@ async function affiliateView(userId: string) {
     .where(eq(affiliateCommissionsTable.affiliateId, profile.id));
   return {
     status: profile.status,
+    applicationSubmitted: true,
     links: rows.map(({ link, productTitle }) => ({
       id: link.id,
       productId: link.productId,
@@ -180,6 +182,7 @@ router.post(
       .select({
         product: productsTable,
         vendorStatus: vendorProfilesTable.status,
+        membershipExpiresAt: vendorProfilesTable.membershipExpiresAt,
         categoryType: categoriesTable.scope,
       })
       .from(productsTable)
@@ -197,6 +200,8 @@ router.post(
       !product ||
       product.product.status !== "published" ||
       product.vendorStatus !== "approved" ||
+      !product.membershipExpiresAt ||
+      product.membershipExpiresAt <= new Date() ||
       !product.product.affiliateEligible ||
       product.product.commissionRateBps <= 0 ||
       product.categoryType !== product.product.type

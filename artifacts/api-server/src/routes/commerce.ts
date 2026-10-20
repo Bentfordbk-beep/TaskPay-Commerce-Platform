@@ -101,7 +101,11 @@ router.post(
     }
     const user = currentUser(res);
     const [result] = await db
-      .select({ product: productsTable, vendorStatus: vendorProfilesTable.status })
+      .select({
+        product: productsTable,
+        vendorStatus: vendorProfilesTable.status,
+        membershipExpiresAt: vendorProfilesTable.membershipExpiresAt,
+      })
       .from(productsTable)
       .innerJoin(
         vendorProfilesTable,
@@ -112,7 +116,9 @@ router.post(
     if (
       !result ||
       result.product.status !== "published" ||
-      result.vendorStatus !== "approved"
+      result.vendorStatus !== "approved" ||
+      !result.membershipExpiresAt ||
+      result.membershipExpiresAt <= new Date()
     ) {
       res.status(404).json({ error: "This product is no longer available." });
       return;

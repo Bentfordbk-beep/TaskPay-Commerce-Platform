@@ -10,6 +10,7 @@ import type { AffiliateOverviewStatus } from './affiliateOverviewStatus';
 
 export interface AffiliateOverview {
   status: AffiliateOverviewStatus;
+  applicationSubmitted: boolean;
   links: AffiliateLink[];
   clicks: number;
   conversions: number;

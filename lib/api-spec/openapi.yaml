@@ -1172,9 +1172,10 @@ components:
         productId: { type: string }
     AffiliateOverview:
       type: object
-      required: [status, links, clicks, conversions, pendingCommissionMinor, approvedCommissionMinor, currency]
+      required: [status, applicationSubmitted, links, clicks, conversions, pendingCommissionMinor, approvedCommissionMinor, currency]
       properties:
         status: { type: string, enum: [pending, approved, rejected] }
+        applicationSubmitted: { type: boolean }
         links:
           type: array
           items: { $ref: "#/components/schemas/AffiliateLink" }

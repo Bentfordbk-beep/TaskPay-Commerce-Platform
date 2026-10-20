@@ -1,0 +1,24 @@
+{
+  "name": "TaskPay",
+  "short_name": "TaskPay",
+  "description": "Sell. Learn. Earn. A digital commerce and opportunity platform.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffefa",
+  "theme_color": "#0a2b63",
+  "icons": [
+    {
+      "src": "icons/taskpay-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/taskpay-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

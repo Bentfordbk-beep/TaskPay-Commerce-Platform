@@ -1,0 +1,44 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "ZwTdcSAz6OxHFJ5hdZQk5"
+uri = "file://artifacts/taskpay/public/icons/taskpay-192.png"
+type = "image"
+title = "TaskPay 192×192 app icon"
+description = "PNG generated from your supplied TaskPay logo for the web manifest."
+logical_id = "80e88641-647e-46ac-b6ae-55c0cc21ea40"
+content_hash = "sha256:f99c44d59583b25d4752742df8d8dd69cdd3e1065907552a34a7f1e2aa6a86f6"
+size = 45603
+mtime_ms = 1792455644593
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:e563137a-904d-4b5c-bfa9-b16ab213c43d/80e88641-647e-46ac-b6ae-55c0cc21ea40/16b7b21b-3d52-4013-8d7e-de8c27995d05"
+storage_version_token = "1792456247039956"
+content_type = "image/png"
+
+[[outputs]]
+id = "qslBdb8Vn_1c8XLUrMk_0"
+uri = "file://artifacts/taskpay/public/icons/taskpay-512.png"
+type = "image"
+title = "TaskPay 512×512 app icon"
+description = "PNG generated from your supplied TaskPay logo for high-resolution app installation."
+logical_id = "25595ab4-a362-4bdb-bb60-e2630efb5ca2"
+content_hash = "sha256:e8090d98f9b7ea7de7243fa7dcd11e653fc71fa364f6653553ebfe34168a5bcd"
+size = 269423
+mtime_ms = 1792455644315
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:e563137a-904d-4b5c-bfa9-b16ab213c43d/25595ab4-a362-4bdb-bb60-e2630efb5ca2/6493456f-e4e8-478b-9413-ceff55c51dd8"
+storage_version_token = "1792456247705844"
+content_type = "image/png"
+
+[[outputs]]
+id = "AKPHMERc56QaeIGN9Ak8V"
+uri = "file://artifacts/taskpay/public/apple-touch-icon.png"
+type = "image"
+title = "TaskPay Apple Touch Icon"
+description = "180×180 PNG referenced for Safari Add to Home Screen."
+logical_id = "bb50d4f4-2bb6-463f-a150-595e4fa6385e"
+content_hash = "sha256:7cb3a45a5d729cd8d65cededd5c2c0d7e90713f15262b8d00459a2a784855550"
+size = 40803
+mtime_ms = 1792455644857
+storage_uri = "gcs://replit-rams-assets-spock/rams/assets/repl:e563137a-904d-4b5c-bfa9-b16ab213c43d/bb50d4f4-2bb6-463f-a150-595e4fa6385e/9286f7ef-516f-4c6c-a2c2-cd307397eb9f"
+storage_version_token = "1792456248292746"
+content_type = "image/png"

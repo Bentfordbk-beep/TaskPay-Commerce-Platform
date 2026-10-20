@@ -4,7 +4,6 @@ import {
   db,
   courseEnrolmentsTable,
   ordersTable,
-  orderItemsTable,
   ticketsTable,
   usersTable,
 } from "@workspace/db";

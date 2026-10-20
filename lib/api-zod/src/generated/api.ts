@@ -950,6 +950,7 @@ export const ListMyTicketsResponse = zod.array(ListMyTicketsResponseItem)
  */
 export const GetAffiliateOverviewResponse = zod.object({
   "status": zod.enum(['pending', 'approved', 'rejected']),
+  "applicationSubmitted": zod.boolean(),
   "links": zod.array(zod.object({
   "id": zod.string(),
   "productId": zod.string(),
@@ -1005,6 +1006,7 @@ export const CreateAffiliateLinkResponse = zod.object({
  */
 export const ApplyForAffiliateResponse = zod.object({
   "status": zod.enum(['pending', 'approved', 'rejected']),
+  "applicationSubmitted": zod.boolean(),
   "links": zod.array(zod.object({
   "id": zod.string(),
   "productId": zod.string(),

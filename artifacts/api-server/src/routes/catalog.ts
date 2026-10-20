@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, ilike, sql } from "drizzle-orm";
 import { Router, type IRouter } from "express";
 import {
   db,
@@ -60,6 +60,7 @@ async function getFeaturedProducts(type: "physical" | "digital") {
         eq(productsTable.type, type),
         eq(productsTable.status, "published"),
         eq(vendorProfilesTable.status, "approved"),
+        gt(vendorProfilesTable.membershipExpiresAt, new Date()),
       ),
     )
     .orderBy(desc(productsTable.createdAt))
@@ -141,7 +142,18 @@ router.get("/home", async (_req, res): Promise<void> => {
       const [result] = await db
         .select({ value: count() })
         .from(productsTable)
-        .where(eq(productsTable.categoryId, category.id));
+        .innerJoin(
+          vendorProfilesTable,
+          eq(productsTable.vendorId, vendorProfilesTable.id),
+        )
+        .where(
+          and(
+            eq(productsTable.categoryId, category.id),
+            eq(productsTable.status, "published"),
+            eq(vendorProfilesTable.status, "approved"),
+            gt(vendorProfilesTable.membershipExpiresAt, new Date()),
+          ),
+        );
       return { ...category, productCount: result?.value ?? 0 };
     }),
   );
@@ -150,7 +162,10 @@ router.get("/home", async (_req, res): Promise<void> => {
     GetHomeSnapshotResponse.parse({
       featuredPhysical,
       featuredDigital,
-      categories: categoryRows,
+      categories: categoryRows.map((category) => ({
+        ...category,
+        type: category.scope,
+      })),
       courses,
       events,
       campaigns,
@@ -177,11 +192,29 @@ router.get("/categories", async (req, res): Promise<void> => {
       const [products] = await db
         .select({ value: count() })
         .from(productsTable)
-        .where(eq(productsTable.categoryId, category.id));
+        .innerJoin(
+          vendorProfilesTable,
+          eq(productsTable.vendorId, vendorProfilesTable.id),
+        )
+        .where(
+          and(
+            eq(productsTable.categoryId, category.id),
+            eq(productsTable.status, "published"),
+            eq(vendorProfilesTable.status, "approved"),
+            gt(vendorProfilesTable.membershipExpiresAt, new Date()),
+          ),
+        );
       return { ...category, productCount: products?.value ?? 0 };
     }),
   );
-  res.json(ListCategoriesResponse.parse(result));
+  res.json(
+    ListCategoriesResponse.parse(
+      result.map((category) => ({
+        ...category,
+        type: category.scope,
+      })),
+    ),
+  );
 });
 
 router.get("/products", async (req, res): Promise<void> => {
@@ -195,6 +228,7 @@ router.get("/products", async (req, res): Promise<void> => {
     eq(productsTable.type, type),
     eq(productsTable.status, "published"),
     eq(vendorProfilesTable.status, "approved"),
+    gt(vendorProfilesTable.membershipExpiresAt, new Date()),
   ];
   if (categoryId) filters.push(eq(productsTable.categoryId, categoryId));
   if (search?.trim()) {
@@ -266,11 +300,18 @@ router.get("/products/:productId", async (req, res): Promise<void> => {
   }
 
   const [vendor] = await db
-    .select({ status: vendorProfilesTable.status })
+    .select({
+      status: vendorProfilesTable.status,
+      membershipExpiresAt: vendorProfilesTable.membershipExpiresAt,
+    })
     .from(vendorProfilesTable)
     .where(eq(vendorProfilesTable.id, product.vendorId))
     .limit(1);
-  if (vendor?.status !== "approved") {
+  if (
+    vendor?.status !== "approved" ||
+    !vendor.membershipExpiresAt ||
+    vendor.membershipExpiresAt <= new Date()
+  ) {
     res.status(404).json({ error: "Product not found." });
     return;
   }

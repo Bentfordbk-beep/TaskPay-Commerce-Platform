@@ -5,7 +5,7 @@ import { shadcn } from '@clerk/themes';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import {
   useAddCartItem, useApplyAsVendor, useApplyToCampaign, useArchiveProduct, useBeginCheckout,
-  useCreateAffiliateLink, useCreateSupportRequest, useEnrolInCourse, useGetAdminSettings,
+  useApplyForAffiliate, useCreateAffiliateLink, useCreateSupportRequest, useEnrolInCourse, useGetAdminSettings,
   useGetAdminSummary, useGetAffiliateOverview, useGetCart, useGetDashboard, useGetHomeSnapshot,
   useGetMe, useGetMyVendor, useGetProduct, useGetWallet, useListAdminRecords,
   useListAffiliateLinks, useListCategories, useListCampaigns, useListCourses, useListEvents,
@@ -31,9 +31,9 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const queryClient = new QueryClient();
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 function stripBase(path: string) { return basePath && path.startsWith(basePath) ? path.slice(basePath.length) || '/' : path; }
 if (!clerkPubKey) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
 
@@ -124,9 +124,13 @@ function BottomNav() {
   return <nav className="tp-bottom-nav" aria-label="Mobile navigation">{links.map(([href, label, Icon]) => <Link key={href} href={href} className={location === href ? 'active' : ''} data-testid={`mobile-nav-${label.toLowerCase()}`}><Icon /><span>{label}</span></Link>)}</nav>;
 }
 function Footer() {
+  const groups: { title: string; links: { href: string; text: string }[] }[] = [
+    { title: 'Explore', links: [{ href: '/shop', text: 'Shop' }, { href: '/digital', text: 'Digital products' }, { href: '/learn', text: 'Learning' }] },
+    { title: 'Participate', links: [{ href: '/vendor', text: 'Become a vendor' }, { href: '/affiliate', text: 'Affiliate programme' }, { href: '/campaigns', text: 'Campaigns' }, { href: '/events', text: 'Events' }] },
+  ];
   return <footer style={{ background: '#162744', color: '#fff', marginTop: 74, padding: '44px 0 32px' }}><div className="tp-container">
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 28, flexWrap: 'wrap' }}><div><Logo /><p style={{ color: '#c1cada', maxWidth: 315, fontSize: 14, lineHeight: 1.7 }}>A trusted everyday hub for commerce, learning and real transaction-based opportunities.</p></div>
-      <div style={{ display: 'flex', gap: 34, flexWrap: 'wrap' }}>{[['Explore', ['/shop', 'Shop'], ['/digital', 'Digital products'], ['/learn', 'Learning']], ['Participate', ['/vendor', 'Become a vendor'], ['/affiliate', 'Affiliate programme'], ['/campaigns', 'Campaigns'], ['/events', 'Events']]].map((group) => <div key={group[0]}><div style={{ fontWeight: 750, marginBottom: 12 }}>{group[0]}</div>{group.slice(1).map(([href, text]) => <Link key={href} href={href} style={{ display: 'block', color: '#c1cada', marginBottom: 9, fontSize: 13, textDecoration: 'none' }}>{text}</Link>)}</div>)}</div>
+      <div style={{ display: 'flex', gap: 34, flexWrap: 'wrap' }}>{groups.map(group => <div key={group.title}><div style={{ fontWeight: 750, marginBottom: 12 }}>{group.title}</div>{group.links.map(link => <Link key={link.href} href={link.href} style={{ display: 'block', color: '#c1cada', marginBottom: 9, fontSize: 13, textDecoration: 'none' }}>{link.text}</Link>)}</div>)}</div>
     </div><div style={{ borderTop: '1px solid #344460', marginTop: 32, paddingTop: 18, fontSize: 12, color: '#aeb9c9', display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}><span>© {new Date().getFullYear()} TaskPay · Sell. Learn. Earn.</span><span>Opportunities depend on real sales, eligible work and platform review. No earnings are guaranteed.</span></div>
   </div></footer>;
 }
@@ -229,6 +233,7 @@ function AffiliatePage() {
   const links = useListAffiliateLinks();
   const products = useListProducts({ type: 'physical', page: 1, pageSize: 48 });
   const digital = useListProducts({ type: 'digital', page: 1, pageSize: 48 });
+  const apply = useApplyForAffiliate();
   const create = useCreateAffiliateLink();
   const client = useQueryClient();
   const [productId, setProductId] = useState('');
@@ -238,9 +243,27 @@ function AffiliatePage() {
     if (!productId) return setNotice('Choose an eligible product first.');
     create.mutate({ data: { productId } }, { onSuccess: () => { client.invalidateQueries({ queryKey: getListAffiliateLinksQueryKey() }); client.invalidateQueries({ queryKey: getGetAffiliateOverviewQueryKey() }); setNotice('Your tracking link is ready. Commission depends on qualifying verified sales.'); }, onError: () => setNotice('We could not create that link. Check eligibility or try later.') });
   };
+  const requestAccess = () => apply.mutate(undefined, {
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: getGetAffiliateOverviewQueryKey() });
+      setNotice('Your affiliate application was submitted for review.');
+    },
+    onError: () => setNotice('We could not submit your application. Please try again.'),
+  });
   return <div className="tp-container" style={{ padding: '40px 0' }}><SectionTitle eyebrow="Promote real products" title="Affiliate programme" body="Share eligible TaskPay products through your own channels. Commissions are tied to qualifying, verified sales—not recruitment. Income is not guaranteed." />
     <QueryState query={overview}><>{overview.data && <div className="metric-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>{[['Status', <Status value={overview.data.status} />], ['Tracked clicks', overview.data.clicks], ['Verified conversions', overview.data.conversions], ['Approved commission', money(overview.data.approvedCommissionMinor, overview.data.currency)]].map(([label,value]: any) => <div className="tp-card" key={label} style={{ padding: 18 }}><div className="tp-muted" style={{ fontSize: 12 }}>{label}</div><div style={{ fontSize: 21, fontWeight: 800, marginTop: 8 }}>{value}</div></div>)}</div>}
-      <div className="affiliate-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 16 }}><div className="tp-card" style={{ padding: 22 }}><h3 style={{ margin: '0 0 6px' }}>Create a tracking link</h3><p className="tp-muted" style={{ fontSize: 13, lineHeight: 1.6 }}>Only currently eligible listings can be promoted.</p><label className="tp-label">Eligible product<select className="tp-input" value={productId} onChange={e => setProductId(e.target.value)} data-testid="select-affiliate-product"><option value="">Choose product</option>{allProducts.map((p: any) => <option value={p.id} key={p.id}>{p.title}</option>)}</select></label><button className="tp-btn" style={{ marginTop: 14 }} onClick={makeLink} disabled={create.isPending} data-testid="button-create-affiliate-link">{create.isPending ? 'Creating…' : 'Create link'} <ArrowRight size={15} /></button>{notice && <div style={{ marginTop: 13 }}><Notice text={notice} /></div>}</div><div className="tp-card" style={{ padding: 22 }}><h3 style={{ margin: '0 0 13px' }}>Your links</h3><QueryState query={links} empty={!links.data?.length}>{links.data?.length ? <div style={{ display: 'grid', gap: 11 }}>{links.data.map((item: any) => <div key={item.id} style={{ padding: 13, background: '#f7f7f3', borderRadius: 11, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`affiliate-link-${item.id}`}><div><strong style={{ fontSize: 14 }}>{item.productTitle}</strong><div className="tp-muted" style={{ fontSize: 11, marginTop: 5 }}>{item.clickCount} clicks · {item.conversionCount} conversions</div></div><button className="tp-btn tp-btn-outline" onClick={() => { navigator.clipboard?.writeText(item.url); setNotice('Link copied to clipboard.'); }} data-testid={`button-copy-link-${item.id}`}>Copy link</button></div>)}</div> : null}</QueryState></div></div>
+      {overview.data?.status === 'approved' ? <div className="affiliate-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 16 }}><div className="tp-card" style={{ padding: 22 }}><h3 style={{ margin: '0 0 6px' }}>Create a tracking link</h3><p className="tp-muted" style={{ fontSize: 13, lineHeight: 1.6 }}>Only currently eligible listings can be promoted.</p><label className="tp-label">Eligible product<select className="tp-input" value={productId} onChange={e => setProductId(e.target.value)} data-testid="select-affiliate-product"><option value="">Choose product</option>{allProducts.map((p: any) => <option value={p.id} key={p.id}>{p.title}</option>)}</select></label><button className="tp-btn" style={{ marginTop: 14 }} onClick={makeLink} disabled={create.isPending} data-testid="button-create-affiliate-link">{create.isPending ? 'Creating…' : 'Create link'} <ArrowRight size={15} /></button>{notice && <div style={{ marginTop: 13 }}><Notice text={notice} /></div>}</div><div className="tp-card" style={{ padding: 22 }}><h3 style={{ margin: '0 0 13px' }}>Your links</h3><QueryState query={links} empty={!links.data?.length}>{links.data?.length ? <div style={{ display: 'grid', gap: 11 }}>{links.data.map((item: any) => <div key={item.id} style={{ padding: 13, background: '#f7f7f3', borderRadius: 11, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`affiliate-link-${item.id}`}><div><strong style={{ fontSize: 14 }}>{item.productTitle}</strong><div className="tp-muted" style={{ fontSize: 11, marginTop: 5 }}>{item.clickCount} clicks · {item.conversionCount} conversions</div></div><button className="tp-btn tp-btn-outline" onClick={() => { navigator.clipboard?.writeText(item.url); setNotice('Link copied to clipboard.'); }} data-testid={`button-copy-link-${item.id}`}>Copy link</button></div>)}</div> : null}</QueryState></div></div> : <div className="tp-card" style={{ padding: 22 }}>
+        <h3 style={{ marginTop: 0 }}>Affiliate access</h3>
+        <p className="tp-muted" style={{ fontSize: 14, lineHeight: 1.65 }}>
+          {overview.data?.status === 'rejected'
+            ? 'Your application was not approved. Contact TaskPay support if you need help.'
+            : overview.data?.applicationSubmitted
+              ? 'Your application is waiting for review. Link creation will be available after approval.'
+              : 'Apply to promote eligible products. TaskPay reviews affiliate applications before issuing tracking links.'}
+        </p>
+        {overview.data?.status === 'pending' && !overview.data.applicationSubmitted && <button className="tp-btn" onClick={requestAccess} disabled={apply.isPending} data-testid="button-apply-affiliate">{apply.isPending ? 'Submitting…' : 'Apply for affiliate access'}</button>}
+        {notice && <div style={{ marginTop: 13 }}><Notice text={notice} /></div>}
+      </div>}
       {overview.data && <p className="tp-muted" style={{ fontSize: 12, marginTop: 18 }}>Pending commission: {money(overview.data.pendingCommissionMinor, overview.data.currency)}. Pending amounts are not withdrawable. Orders may be reviewed, cancelled or reversed before approval.</p>}</>
     </QueryState><style>{'@media(max-width:760px){.metric-grid{grid-template-columns:repeat(2,1fr)!important}.affiliate-grid{grid-template-columns:1fr!important}}'}</style></div>;
 }
@@ -383,8 +406,36 @@ function AdminLogin() {
 function AuthGate({ children }: { children: ReactNode }) {
   return <><Show when="signed-in">{children}</Show><Show when="signed-out"><div className="tp-container" style={{ padding: '76px 0' }}><div className="tp-card" style={{ maxWidth: 540, margin: '0 auto', padding: 30, textAlign: 'center' }}><ShieldCheck size={28} color="#36766e" /><h2>Sign in to continue</h2><p className="tp-muted" style={{ lineHeight: 1.65 }}>This part of TaskPay is connected to your account. Your records stay private and are only shown after you sign in.</p><Link href="/sign-in" className="tp-btn" data-testid="button-auth-gate">Sign in securely</Link></div></div></Show></>;
 }
+function adminActions(area: string, status: string) {
+  if (area === 'users') return status === 'active' ? [{ label: 'Suspend', status: 'suspended' }] : status === 'suspended' ? [{ label: 'Activate', status: 'active' }] : [];
+  if (area === 'vendors' || area === 'affiliates' || area === 'payouts') {
+    if (status === 'pending') return [{ label: 'Approve', status: 'approved' }, { label: 'Reject', status: 'rejected' }];
+    return [];
+  }
+  if (area === 'products' || area === 'courses' || area === 'events') {
+    const publishStatus = area === 'products' ? 'published' : 'published';
+    if (status === 'pending') return [{ label: 'Publish', status: publishStatus }, { label: 'Reject', status: 'rejected' }];
+    if (status === 'published') return [{ label: 'Archive', status: 'archived' }];
+    return [];
+  }
+  if (area === 'campaigns') {
+    if (status === 'pending_review') return [{ label: 'Open campaign', status: 'open' }, { label: 'Reject', status: 'rejected' }];
+    if (status === 'open') return [{ label: 'Cancel', status: 'cancelled' }];
+    return [];
+  }
+  if (area === 'campaign-submissions') {
+    if (status === 'submitted') return [{ label: 'Approve work', status: 'approved' }, { label: 'Request revision', status: 'revision_requested' }, { label: 'Reject', status: 'rejected' }];
+    return [];
+  }
+  if (area === 'support') {
+    if (status === 'open') return [{ label: 'In progress', status: 'in_progress' }, { label: 'Resolve', status: 'resolved' }];
+    if (status === 'in_progress') return [{ label: 'Resolve', status: 'resolved' }];
+  }
+  return [];
+}
 function AdminWorkspace() {
-  const [area, setArea] = useState<'users' | 'vendors' | 'products' | 'orders' | 'campaigns' | 'courses' | 'events' | 'payouts' | 'support'>('vendors');
+  const areas = ['users', 'vendors', 'products', 'orders', 'campaigns', 'campaign-submissions', 'courses', 'events', 'affiliates', 'payouts', 'support'] as const;
+  const [area, setArea] = useState<(typeof areas)[number]>('vendors');
   const summary = useGetAdminSummary();
   const records = useListAdminRecords(area);
   const settings = useGetAdminSettings();
@@ -393,8 +444,11 @@ function AdminWorkspace() {
   const client = useQueryClient();
   const [message, setMessage] = useState('');
   const [tab, setTab] = useState('summary');
-  const areas: typeof area[] = ['users', 'vendors', 'products', 'orders', 'campaigns', 'courses', 'events', 'payouts', 'support'];
   const reviewItem = (item: any, status: string) => {
+    if (area === 'orders') {
+      setMessage('Orders are view-only. Payment status cannot be changed manually.');
+      return;
+    }
     const reason = prompt(`Reason for setting status to ${status}:`);
     if (!reason || reason.trim().length < 3) return;
     review.mutate({ recordType: area, recordId: item.id, data: { status, reason } }, { onSuccess: () => { client.invalidateQueries({ queryKey: getListAdminRecordsQueryKey(area) }); client.invalidateQueries({ queryKey: getGetAdminSummaryQueryKey() }); setMessage(`${item.title} status updated.`); }, onError: () => setMessage('This review could not be completed. Check your admin permissions.') });
@@ -403,8 +457,8 @@ function AdminWorkspace() {
   const tabs = [['summary', 'Summary'], ['records', 'Records'], ['settings', 'Settings']];
   return <div className="tp-container" style={{ padding: '36px 0' }}><div className="tp-eyebrow">TaskPay administration</div><h1 style={{ fontSize: 38, margin: '7px 0 17px' }}>Platform operations</h1>{message && <div style={{ marginBottom: 14 }}><Notice text={message} /></div>}
     <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid #e7e5de', marginBottom: 20 }}>{tabs.map(([key,label]) => <button key={key} onClick={() => setTab(key)} style={{ border: 0, borderBottom: tab === key ? '2px solid #d9a31c' : '2px solid transparent', background: 'transparent', padding: '10px 14px', fontWeight: 750, color: '#25334b', cursor: 'pointer' }} data-testid={`admin-tab-${key}`}>{label}</button>)}</div>
-    {tab === 'summary' && <QueryState query={summary}>{summary.data && <><div className="admin-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>{[['Users', summary.data.users], ['Vendors', summary.data.vendors], ['Pending vendors', summary.data.pendingVendors], ['Products', summary.data.products], ['Pending products', summary.data.pendingProducts], ['Orders', summary.data.orders], ['Confirmed volume', money(summary.data.paidVolumeMinor, summary.data.currency)], ['Platform revenue', money(summary.data.platformRevenueMinor, summary.data.currency)], ['Pending payouts', summary.data.pendingPayouts], ['Campaigns', summary.data.campaigns], ['Pending submissions', summary.data.pendingSubmissions], ['Courses', summary.data.courses], ['Events', summary.data.events], ['Tickets sold', summary.data.ticketsSold]].map(([label,value]: any) => <div className="tp-card" key={label} style={{ padding: 17 }}><div className="tp-muted" style={{ fontSize: 12 }}>{label}</div><div style={{ fontSize: 23, marginTop: 8, fontWeight: 800 }}>{value}</div></div>)}</div><p className="tp-muted" style={{ fontSize: 12, marginTop: 13 }}>Figures reflect database-backed API records. Confirmed volume and platform revenue are shown separately; neither represents a withdrawable user balance.</p></>}</QueryState>}
-    {tab === 'records' && <><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>{areas.map(a => <button key={a} className={`tp-btn ${a === area ? '' : 'tp-btn-outline'}`} style={{ padding: '8px 12px', fontSize: 12 }} onClick={() => setArea(a)} data-testid={`admin-area-${a}`}>{a}</button>)}</div><QueryState query={records} empty={!records.data?.length}><div className="tp-card" style={{ overflow: 'auto' }}>{records.data?.map((r: any) => <div key={r.id} style={{ padding: 16, borderBottom: '1px solid #eeede7', display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }} data-testid={`admin-record-${r.id}`}><div><strong>{r.title}</strong><div className="tp-muted" style={{ fontSize: 12, marginTop: 4 }}>{r.ownerName || r.recordType} · {r.detail || dateLabel(r.createdAt)}</div></div><div style={{ display: 'flex', gap: 9, alignItems: 'center' }}><Status value={r.status} />{['pending','pending_review','applied'].includes(r.status) && <><button className="tp-btn" style={{ padding: '8px 11px', fontSize: 12 }} onClick={() => reviewItem(r, 'approved')} data-testid={`button-approve-${r.id}`}>Approve</button><button className="tp-btn tp-btn-outline" style={{ padding: '8px 11px', fontSize: 12 }} onClick={() => reviewItem(r, 'rejected')} data-testid={`button-reject-${r.id}`}>Reject</button></>}</div></div>)}</div></QueryState></>}
+      {tab === 'summary' && <QueryState query={summary}>{summary.data && <><div className="admin-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>{[['Users', summary.data.users], ['Active users', summary.data.activeUsers], ['Vendors', summary.data.vendors], ['Pending vendors', summary.data.pendingVendors], ['Physical products', summary.data.physicalProducts], ['Digital products', summary.data.digitalProducts], ['Products', summary.data.products], ['Pending products', summary.data.pendingProducts], ['Orders', summary.data.orders], ['Confirmed volume', money(summary.data.paidVolumeMinor, summary.data.currency)], ['Platform revenue', money(summary.data.platformRevenueMinor, summary.data.currency)], ['Pending payouts', summary.data.pendingPayouts], ['Campaigns', summary.data.campaigns], ['Pending submissions', summary.data.pendingSubmissions], ['Pending commissions', money(summary.data.pendingCommissionsMinor, summary.data.currency)], ['Courses', summary.data.courses], ['Events', summary.data.events], ['Tickets sold', summary.data.ticketsSold]].map(([label,value]: any) => <div className="tp-card" key={label} style={{ padding: 17 }}><div className="tp-muted" style={{ fontSize: 12 }}>{label}</div><div style={{ fontSize: 23, marginTop: 8, fontWeight: 800 }}>{value}</div></div>)}</div><p className="tp-muted" style={{ fontSize: 12, marginTop: 13 }}>Figures reflect database-backed API records. Confirmed volume and platform revenue are shown separately; neither represents a withdrawable user balance.</p></>}</QueryState>}
+     {tab === 'records' && <><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>{areas.map(a => <button key={a} className={`tp-btn ${a === area ? '' : 'tp-btn-outline'}`} style={{ padding: '8px 12px', fontSize: 12 }} onClick={() => setArea(a)} data-testid={`admin-area-${a}`}>{a.replaceAll('-', ' ')}</button>)}</div><QueryState query={records} empty={!records.data?.length}><div className="tp-card" style={{ overflow: 'auto' }}>{records.data?.map((r: any) => <div key={r.id} style={{ padding: 16, borderBottom: '1px solid #eeede7', display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }} data-testid={`admin-record-${r.id}`}><div><strong>{r.title}</strong><div className="tp-muted" style={{ fontSize: 12, marginTop: 4 }}>{r.ownerName || r.recordType} · {r.detail || dateLabel(r.createdAt)}</div></div><div style={{ display: 'flex', gap: 9, alignItems: 'center' }}><Status value={r.status} />{adminActions(area, r.status).map(action => <button key={action.status} className={action.status === 'rejected' || action.status === 'suspended' ? 'tp-btn tp-btn-outline' : 'tp-btn'} style={{ padding: '8px 11px', fontSize: 12 }} onClick={() => reviewItem(r, action.status)} data-testid={`button-review-${action.status}-${r.id}`}>{action.label}</button>)}</div></div>)}</div></QueryState></>}
     {tab === 'settings' && <QueryState query={settings}>{settings.data && <form className="tp-card settings-grid" onSubmit={saveSettings} style={{ padding: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13, maxWidth: 800 }}><div style={{ gridColumn: '1/-1', display: 'flex', justifyContent: 'space-between' }}><h3 style={{ margin: 0 }}>Platform settings</h3><Status value={settings.data.paymentStatus} /></div>{[['membership','Vendor membership (GHS)',settings.data.vendorMembershipMinor/100],['membershipDays','Membership duration (days)',settings.data.vendorMembershipDays],['salesFee','Sales commission (basis points)',settings.data.salesCommissionBps],['affiliateFee','Affiliate default (basis points)',settings.data.affiliateDefaultBps],['campaignFee','Campaign fee (basis points)',settings.data.campaignFeeBps],['courseFee','Course commission (basis points)',settings.data.courseCommissionBps],['ticketFee','Ticket fee (basis points)',settings.data.ticketFeeBps],['minimumPayout','Minimum payout (GHS)',settings.data.minimumPayoutMinor/100]].map(([name,label,value]: any) => <label className="tp-label" key={name}>{label}<input className="tp-input" name={name} type="number" min="0" step={name.toLowerCase().includes('fee') ? 1 : .01} defaultValue={value} required data-testid={`input-setting-${name}`} /></label>)}<button className="tp-btn" disabled={updateSettings.isPending} data-testid="button-save-settings">{updateSettings.isPending ? 'Saving…' : 'Save settings'}</button><div className="tp-muted" style={{ alignSelf: 'center', fontSize: 12 }}>Fee rates use basis points. Payment status is managed by platform configuration.</div></form>}</QueryState>}
     <style>{'@media(max-width:760px){.admin-metrics{grid-template-columns:repeat(2,1fr)!important}.settings-grid{grid-template-columns:1fr!important}.settings-grid>div:first-child{grid-column:auto!important}}'}</style></div>;
 }

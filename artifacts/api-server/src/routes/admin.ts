@@ -6,8 +6,6 @@ import {
   affiliateProfilesTable,
   campaignApplicationsTable,
   campaignsTable,
-  categoriesTable,
-  courseEnrolmentsTable,
   coursesTable,
   db,
   eventsTable,
